@@ -1,10 +1,4 @@
-import {
-  Action,
-  createFeatureSelector,
-  createReducer,
-  createSelector,
-  on
-} from '@ngrx/store';
+import { Action, createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
 import * as TodoActions from './todo.actions';
 import { Todo, TodoFilter } from './todo.model';
 
@@ -20,6 +14,32 @@ export const selectTodos = createSelector(
 export const selectFilter = createSelector(
   feature,
   state => state.filter
+);
+
+export const selectRemovingIds = createSelector(
+  feature,
+  state => state.removingIds
+);
+
+export const selectTogglingIds = createSelector(
+  feature,
+  state => state.togglingIds
+);
+
+export const selectIsToggling = createSelector(
+  selectTogglingIds,
+  (ids: string[], { id }: { id: string }) => ids.includes(id)
+);
+
+export const selectIsRemoving = createSelector(
+  selectRemovingIds,
+  (ids: string[], { id }: { id: string }) => ids.includes(id)
+);
+
+export const selectIsLocked = createSelector(
+  selectIsRemoving,
+  selectIsToggling,
+  (t, r) => t || r
 );
 
 export const selectFilteredTodos = createSelector(
@@ -45,11 +65,15 @@ export const selectTodosLength = createSelector(
 export interface State {
   todos: Todo[];
   filter: TodoFilter | null;
+  removingIds: string[];
+  togglingIds: string[];
 }
 
 export const initialState: State = {
   todos: [],
-  filter: null
+  filter: null,
+  removingIds: [],
+  togglingIds: [],
 };
 
 const todoReducer = createReducer(
@@ -63,12 +87,38 @@ const todoReducer = createReducer(
   on(TodoActions.remove, (state, { id }) => {
     return {
       ...state,
+      removingIds: [...state.removingIds, id]
+    };
+  }),
+  on(TodoActions.removeError, (state, { id }) => {
+    return {
+      ...state,
+      removingIds: state.removingIds.filter(i => i !== id)
+    };
+  }),
+  on(TodoActions.removeSuccess, (state, { id }) => {
+    return {
+      ...state,
+      removingIds: state.removingIds.filter(i => i !== id),
       todos: state.todos.filter(t => t.id !== id)
     };
   }),
   on(TodoActions.toggle, (state, { id }) => {
     return {
       ...state,
+      togglingIds: [...state.togglingIds, id],
+    };
+  }),
+  on(TodoActions.toggleError, (state, { id }) => {
+    return {
+      ...state,
+      togglingIds: state.togglingIds.filter(i => i !==id),
+    };
+  }),
+  on(TodoActions.toggleSuccess, (state, { id }) => {
+    return {
+      ...state,
+      togglingIds: state.togglingIds.filter(i => i !==id),
       todos: state.todos.map(t =>
         t.id === id ? { ...t, isDone: !t.isDone } : t
       )

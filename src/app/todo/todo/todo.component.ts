@@ -7,6 +7,9 @@ import { Todo, TodoFilter } from '../todo.model';
 import {
   selectFilter,
   selectFilteredTodos,
+  selectIsLocked,
+  selectIsRemoving,
+  selectIsToggling,
   selectTodosLength
 } from '../todo.reducer';
 
@@ -17,8 +20,18 @@ import {
     <ul>
       <li *ngFor="let todo of todos$ | async" [class.done]="todo.isDone">
         {{ todo.content }}
-        <button (click)="toggle(todo.id)">Toggle</button>
-        <button (click)="remove(todo.id)">Remove</button>
+        <button
+          (click)="toggle(todo.id)"
+          [disabled]="isLocked(todo.id) | async"
+        >
+          {{ (isToggling(todo.id) | async) ? 'Toggling...' : 'Toggle' }}
+        </button>
+        <button
+          (click)="remove(todo.id)"
+          [disabled]="isLocked(todo.id) | async"
+        >
+          {{ (isRemoving(todo.id) | async) ? 'Removing...' : 'Remove' }}
+        </button>
       </li>
     </ul>
 
@@ -61,5 +74,14 @@ export class TodoComponent {
   }
   filterChanged(filter: TodoFilter | null) {
     this.store.dispatch(TodoAction.filterChanged({ filter }));
+  }
+  isLocked(id: string) {
+    return this.store.pipe(select(selectIsLocked, { id }));
+  }
+  isRemoving(id: string) {
+    return this.store.pipe(select(selectIsRemoving, { id }));
+  }
+  isToggling(id: string) {
+    return this.store.pipe(select(selectIsToggling, { id }));
   }
 }
