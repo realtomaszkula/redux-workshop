@@ -18,7 +18,7 @@ export const removeSuccess = createAction(
 
 export const removeError = createAction(
   '[API] Remove Todo Error',
-  props<{ id: string }>()
+  props<{ id: string, message: string }>()
 );
 
 export const toggle = createAction(
@@ -33,7 +33,7 @@ export const toggleSuccess = createAction(
 
 export const toggleError = createAction(
   '[API] Toggle Todo Error',
-  props<{ id: string }>()
+  props<{ id: string, message: string }>()
 );
 
 export const filterChanged = createAction(
