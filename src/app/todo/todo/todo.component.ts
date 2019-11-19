@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import uuid from 'uuid';
@@ -47,7 +47,8 @@ import {
         text-decoration: line-through;
       }
     `
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TodoComponent {
   todos$: Observable<Todo[]> = this.store.pipe(select(selectFilteredTodos));
